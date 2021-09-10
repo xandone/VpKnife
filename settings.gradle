@@ -1,0 +1,4 @@
+rootProject.name='VpKnife'
+include ':app'
+include ':vp-annotation'
+include ':vp-compiler'

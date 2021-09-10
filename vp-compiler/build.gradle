@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    implementation project(path:':vp-annotation')
+    implementation'com.google.auto.service:auto-service:1.0-rc2'
+    //Gradle 5.0将忽略compile classpath中的 annotationProcessor，因此需要手动添加annotationProcessor
+    annotationProcessor'com.google.auto.service:auto-service:1.0-rc2'
+
+    implementation 'com.squareup:javapoet:1.10.0'
+
+}
+
+sourceCompatibility = "7"
+targetCompatibility = "7"
