@@ -2,13 +2,16 @@ package com.test.vpknife;
 
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -61,17 +64,23 @@ public class VpProcessor extends AbstractProcessor {
         String clazzName = "Adapter" + "$Creater";
         for (Element element : elements) {
             System.out.println("next()=" + element.asType().toString());
+            System.out.println("next()=" + element.getSimpleName().toString());
+
+            FieldSpec.Builder field1 = FieldSpec.builder(ParameterizedTypeName
+                    .get(ClassName.get(List.class), ClassName.get("androidx.fragment.app", "Fragment")), "list")
+                    .addModifiers(Modifier.PRIVATE);
+
             MethodSpec.Builder method1 = MethodSpec.methodBuilder("getItem")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
                     .addParameter(int.class, "position")
-                    .addStatement("return null")
+                    .addStatement("return list.get(position)")
                     .returns(ClassName.get("androidx.fragment.app", "Fragment"));
 
             MethodSpec.Builder method2 = MethodSpec.methodBuilder("getCount")
                     .addAnnotation(Override.class)
                     .addModifiers(Modifier.PUBLIC)
-                    .addStatement("return 0")
+                    .addStatement("return list.size()")
                     .returns(int.class);
 
             MethodSpec.Builder constructorMethods = MethodSpec.constructorBuilder()
@@ -80,11 +89,21 @@ public class VpProcessor extends AbstractProcessor {
                     .addParameter(int.class, "behavior")
                     .addStatement("super(fm,behavior)");
 
+            MethodSpec.Builder con2 = MethodSpec.constructorBuilder()
+                    .addModifiers(Modifier.PUBLIC)
+                    .addParameter(ClassName.get("androidx.fragment.app", "FragmentManager"), "fm")
+                    .addParameter(int.class, "behavior")
+                    .addParameter(ParameterizedTypeName
+                            .get(ClassName.get(List.class), ClassName.get("androidx.fragment.app", "Fragment")), "list")
+                    .addStatement("this(fm,behavior)")
+                    .addStatement("this.list=list");
 
             TypeSpec clazz = TypeSpec.classBuilder(clazzName)
                     .addModifiers(Modifier.PUBLIC)
                     .superclass(ClassName.get(element.asType()))
+                    .addField(field1.build())
                     .addMethod(constructorMethods.build())
+                    .addMethod(con2.build())
                     .addMethod(method1.build())
                     .addMethod(method2.build())
                     .build();
